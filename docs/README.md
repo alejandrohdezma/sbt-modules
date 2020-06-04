@@ -3,7 +3,10 @@
 [![][github-action-badge]][github-action] [![][maven-badge]][maven] [![][steward-badge]][steward] 
 
 ```diff
+- skip in publish := true
+- 
 lazy val docs = project
+-  .settings(skip in publish := true)
 -  .dependsOn(allProjects: _*)
 +  .dependsOn(allModules: _*)
   .in(file("docs"))
@@ -17,6 +20,8 @@ lazy val docs = project
 - lazy val plugin = project
 -   .in(file("modules/plugin"))
 -   .settings(name := "my-library-plugin")
+-   .dependsOn(core)
++   .dependsOn(`my-library-core`)
 -
 - lazy val allProjects: Seq[ClasspathDep[ProjectReference]] = Seq(
 -   core,
@@ -41,7 +46,7 @@ For example, the following SBT configuration:
 ```sbt
 lazy val `my-library-core` = module
 
-lazy val `my-library-plugin` = module 
+lazy val `my-library-plugin` = module.dependsOn(`my-library-core`) 
 ```
 
 Would expect the following directory structure:
@@ -66,7 +71,29 @@ lazy val documentation = project.dependsOn(allModules: _*)
 
 lazy val `my-library-core` = module
 
-lazy val `my-library-plugin` = module 
+lazy val `my-library-plugin` = module.dependsOn(`my-library-core`)
+```
+
+### Auto-`skip in publish`
+
+Forget about setting `skip in publish := true` again. Adding this plugin to your build will disable publishing for all the projects in the build (including the auto-generated root plugin), except for those created with `module`.
+
+However, if you also want to exclude any of those created with `module` you can always add `.settings(skip in publish := true)`.
+
+Example:
+
+```sbt
+// Will not be published
+lazy val documentation = project.dependsOn(allmodules: _*)
+
+// Will be published
+lazy val `my-library-plugin` = module.dependsOn(`my-library-core`)
+
+// Will be published
+lazy val `my-library-core` = module
+
+// Will not be published
+lazy val `my-library-util` = module.settings(skip in publish := true)
 ```
 
 [github-action]: https://github.com/alejandrohdezma/sbt-modules/actions
