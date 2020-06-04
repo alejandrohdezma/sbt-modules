@@ -1,40 +1,13 @@
 # Changelog
 
-## [v0.2.0](https://github.com/alejandrohdezma/sbt-codecov/tree/v0.2.0) (2020-04-27)
+## [v0.1.0](https://github.com/alejandrohdezma/sbt-modules/tree/v0.1.0) (2020-06-04)
 
-[Full Changelog](https://github.com/alejandrohdezma/sbt-codecov/compare/v0.1.1...v0.2.0)
-
-🚀 **Features**
-
-- `test` and `coverageAggregate` should be run in cross-compile mode [\#21](https://github.com/alejandrohdezma/sbt-codecov/pull/21) ([alejandrohdezma](https://github.com/alejandrohdezma))
-
-📈 **Dependency updates**
-
-- Update Scala, SBT & plugins to latest version [\#19](https://github.com/alejandrohdezma/sbt-codecov/pull/19) ([alejandrohdezma](https://github.com/alejandrohdezma))
-
-**Merged pull requests:**
-
-- Add CODEOWNERS [\#20](https://github.com/alejandrohdezma/sbt-codecov/pull/20) ([alejandrohdezma](https://github.com/alejandrohdezma))
-
-## [v0.1.1](https://github.com/alejandrohdezma/sbt-codecov/tree/v0.1.1) (2020-04-20)
-
-[Full Changelog](https://github.com/alejandrohdezma/sbt-codecov/compare/v0.1.0...v0.1.1)
+[Full Changelog](https://github.com/alejandrohdezma/sbt-modules/compare/853e2ceb5714f6deeb1212c12e762e2a402df902...v0.1.0)
 
 🚀 **Features**
 
-- Add way of disabling uploading code to Codecov using system property [\#14](https://github.com/alejandrohdezma/sbt-codecov/pull/14) ([alejandrohdezma](https://github.com/alejandrohdezma))
-
-## [v0.1.0](https://github.com/alejandrohdezma/sbt-codecov/tree/v0.1.0) (2020-04-10)
-
-[Full Changelog](https://github.com/alejandrohdezma/sbt-codecov/compare/cfb2974fee74c72d5fc561e7af25b34e1cdec35e...v0.1.0)
-
-🚀 **Features**
-
-- Add first version of the plugin [\#3](https://github.com/alejandrohdezma/sbt-codecov/pull/3) ([alejandrohdezma](https://github.com/alejandrohdezma))
-
-📘 **Documentation**
-
-- Add README and improve plugin docs [\#6](https://github.com/alejandrohdezma/sbt-codecov/pull/6) ([alejandrohdezma](https://github.com/alejandrohdezma))
+- Enable automatic skip in publish for all projects \(except those crated with `module`\) [\#2](https://github.com/alejandrohdezma/sbt-modules/pull/2) ([alejandrohdezma](https://github.com/alejandrohdezma))
+- Add `allModules` to plugin [\#1](https://github.com/alejandrohdezma/sbt-modules/pull/1) ([alejandrohdezma](https://github.com/alejandrohdezma))
 
 
 

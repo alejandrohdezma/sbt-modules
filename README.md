@@ -1,9 +1,14 @@
-# SBT plugin that simplifies modules creation within SBT
+# SBT plugin that simplifies modules creation
 
 [![][github-action-badge]][github-action] [![][maven-badge]][maven] [![][steward-badge]][steward] 
 
 ```diff
+- skip in publish := true
+- 
 lazy val docs = project
+-  .settings(skip in publish := true)
+-  .dependsOn(allProjects: _*)
++  .dependsOn(allModules: _*)
   .in(file("docs"))
 
 + lazy val `my-library-core` = module
@@ -15,6 +20,13 @@ lazy val docs = project
 - lazy val plugin = project
 -   .in(file("modules/plugin"))
 -   .settings(name := "my-library-plugin")
+-   .dependsOn(core)
++   .dependsOn(`my-library-core`)
+-
+- lazy val allProjects: Seq[ClasspathDep[ProjectReference]] = Seq(
+-   core,
+-   plugin
+- )
 ```
 
 ## Installation
@@ -22,7 +34,7 @@ lazy val docs = project
 Add the following line to your `plugins.sbt` file:
 
 ```sbt
-addSbtPlugin("com.alejandrohdezma" % "sbt-modules" % "0.0.0")
+addSbtPlugin("com.alejandrohdezma" % "sbt-modules" % "0.1.0")
 ```
 
 ## Usage
@@ -31,10 +43,10 @@ Use `module` instead of `project` to create your SBT modules. Unlike `project`, 
 
 For example, the following SBT configuration:
 
-```scala
+```sbt
 lazy val `my-library-core` = module
 
-lazy val `my-library-plugin` = module 
+lazy val `my-library-plugin` = module.dependsOn(`my-library-core`) 
 ```
 
 Would expect the following directory structure:
@@ -48,6 +60,40 @@ Would expect the following directory structure:
 |       +-- src
 +-- build.sbt
 +-- project
+```
+
+### Retrieveing all modules created with `module`
+
+`sbt-modules` creates a special variable called `allModules` that aggregates all the modules created with `module`, so you can pass it along as a dependency to other projects in your build, like:
+
+```sbt
+lazy val documentation = project.dependsOn(allModules: _*)
+
+lazy val `my-library-core` = module
+
+lazy val `my-library-plugin` = module.dependsOn(`my-library-core`)
+```
+
+### Auto-`skip in publish`
+
+Forget about setting `skip in publish := true` again. Adding this plugin to your build will disable publishing for all the projects in the build (including the auto-generated root plugin), except for those created with `module`.
+
+However, if you also want to exclude any of those created with `module` you can always add `.settings(skip in publish := true)`.
+
+Example:
+
+```sbt
+// Will not be published
+lazy val documentation = project.dependsOn(allmodules: _*)
+
+// Will be published
+lazy val `my-library-plugin` = module.dependsOn(`my-library-core`)
+
+// Will be published
+lazy val `my-library-core` = module
+
+// Will not be published
+lazy val `my-library-util` = module.settings(skip in publish := true)
 ```
 
 [github-action]: https://github.com/alejandrohdezma/sbt-modules/actions
