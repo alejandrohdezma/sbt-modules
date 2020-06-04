@@ -16,24 +16,34 @@
 
 package com.alejandrohdezma.sbt.modules
 
+import scala.collection.mutable
 import scala.reflect.macros._
 
 import sbt._
 
 import scala.language.experimental.macros
 
+@SuppressWarnings(Array("scalafix:Disable.scala.collection.mutable", "scalafix:DisableSyntax.implicitConversion"))
 object ModulesPlugin extends AutoPlugin {
 
   override def trigger = allRequirements
 
   object autoImport {
 
+    /** List of all modules created with [[module]] */
+    val allModules: mutable.MutableList[Project] = mutable.MutableList[Project]()
+
+    implicit def MutableListProject2ListClasspathDependency(
+        list: mutable.MutableList[Project]
+    ): List[ClasspathDep[ProjectReference]] =
+      list.map(classpathDependency(_)).toList
+
     /**
      * Creates a new Project with `modules` as base directory.
      *
-     * This is a macro that expects to be assigned directly to a `val`.
+      * This is a macro that expects to be assigned directly to a `val`.
      *
-     * The name of the val is used as the project ID and the name of its base
+      * The name of the val is used as the project ID and the name of its base
      * directory inside `modules`.
      */
     def module: Project = macro Macros.projectMacroImpl
@@ -54,7 +64,11 @@ object ModulesPlugin extends AutoPlugin {
       val name = c.Expr[String](Literal(Constant(enclosingValName)))
 
       reify {
-        Project(name.splice, file("modules") / name.splice)
+        val project = Project(name.splice, file("modules") / name.splice)
+
+        ModulesPlugin.autoImport.allModules += project
+
+        project
       }
     }
 

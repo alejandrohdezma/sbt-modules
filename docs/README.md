@@ -4,6 +4,8 @@
 
 ```diff
 lazy val docs = project
+-  .dependsOn(allProjects: _*)
++  .dependsOn(allModules: _*)
   .in(file("docs"))
 
 + lazy val `my-library-core` = module
@@ -15,6 +17,11 @@ lazy val docs = project
 - lazy val plugin = project
 -   .in(file("modules/plugin"))
 -   .settings(name := "my-library-plugin")
+-
+- lazy val allProjects: Seq[ClasspathDep[ProjectReference]] = Seq(
+-   core,
+-   plugin
+- )
 ```
 
 ## Installation
@@ -31,7 +38,7 @@ Use `module` instead of `project` to create your SBT modules. Unlike `project`, 
 
 For example, the following SBT configuration:
 
-```scala
+```sbt
 lazy val `my-library-core` = module
 
 lazy val `my-library-plugin` = module 
@@ -48,6 +55,18 @@ Would expect the following directory structure:
 |       +-- src
 +-- build.sbt
 +-- project
+```
+
+### Retrieveing all modules created with `module`
+
+`sbt-modules` creates a special variable called `allModules` that aggregates all the modules created with `module`, so you can pass it along as a dependency to other projects in your build, like:
+
+```sbt
+lazy val documentation = project.dependsOn(allModules: _*)
+
+lazy val `my-library-core` = module
+
+lazy val `my-library-plugin` = module 
 ```
 
 [github-action]: https://github.com/alejandrohdezma/sbt-modules/actions
