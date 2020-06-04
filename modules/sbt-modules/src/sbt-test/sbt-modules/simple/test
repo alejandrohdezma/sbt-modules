@@ -1,2 +1,3 @@
 # this test ensures modules are instantiated from "modules" folder
-> check
+> checkModules
+> checkRoot

@@ -19,6 +19,7 @@ package com.alejandrohdezma.sbt.modules
 import scala.collection.mutable
 import scala.reflect.macros._
 
+import sbt.Keys._
 import sbt._
 
 import scala.language.experimental.macros
@@ -65,6 +66,7 @@ object ModulesPlugin extends AutoPlugin {
 
       reify {
         val project = Project(name.splice, file("modules") / name.splice)
+          .settings(skip in publish := false)
 
         ModulesPlugin.autoImport.allModules += project
 
@@ -73,5 +75,7 @@ object ModulesPlugin extends AutoPlugin {
     }
 
   }
+
+  override def buildSettings: Seq[Def.Setting[_]] = Seq(publish / skip := true)
 
 }
