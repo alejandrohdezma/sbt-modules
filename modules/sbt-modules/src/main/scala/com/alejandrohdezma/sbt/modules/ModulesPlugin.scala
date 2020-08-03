@@ -42,9 +42,9 @@ object ModulesPlugin extends AutoPlugin {
     /**
      * Creates a new Project with `modules` as base directory.
      *
-      * This is a macro that expects to be assigned directly to a `val`.
+     * This is a macro that expects to be assigned directly to a `val`.
      *
-      * The name of the val is used as the project ID and the name of its base
+     * The name of the val is used as the project ID and the name of its base
      * directory inside `modules`.
      */
     def module: Project = macro Macros.projectMacroImpl
