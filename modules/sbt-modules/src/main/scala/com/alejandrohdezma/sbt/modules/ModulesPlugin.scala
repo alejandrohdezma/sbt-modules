@@ -17,12 +17,11 @@
 package com.alejandrohdezma.sbt.modules
 
 import scala.collection.mutable
+import scala.language.experimental.macros
 import scala.reflect.macros._
 
 import sbt.Keys._
 import sbt._
-
-import scala.language.experimental.macros
 
 @SuppressWarnings(Array("scalafix:Disable.scala.collection.mutable", "scalafix:DisableSyntax.implicitConversion"))
 object ModulesPlugin extends AutoPlugin {
@@ -42,9 +41,9 @@ object ModulesPlugin extends AutoPlugin {
     /**
      * Creates a new Project with `modules` as base directory.
      *
-      * This is a macro that expects to be assigned directly to a `val`.
+     * This is a macro that expects to be assigned directly to a `val`.
      *
-      * The name of the val is used as the project ID and the name of its base
+     * The name of the val is used as the project ID and the name of its base
      * directory inside `modules`.
      */
     def module: Project = macro Macros.projectMacroImpl
