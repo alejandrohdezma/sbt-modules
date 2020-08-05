@@ -17,12 +17,11 @@
 package com.alejandrohdezma.sbt.modules
 
 import scala.collection.mutable
+import scala.language.experimental.macros
 import scala.reflect.macros._
 
 import sbt.Keys._
 import sbt._
-
-import scala.language.experimental.macros
 
 @SuppressWarnings(Array("scalafix:Disable.scala.collection.mutable", "scalafix:DisableSyntax.implicitConversion"))
 object ModulesPlugin extends AutoPlugin {
