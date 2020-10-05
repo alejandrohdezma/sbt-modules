@@ -22,7 +22,13 @@ import scala.reflect.macros._
 import sbt.Keys._
 import sbt._
 
-@SuppressWarnings(Array("scalafix:Disable.scala.collection.mutable", "scalafix:DisableSyntax.implicitConversion"))
+@SuppressWarnings(
+  Array(
+    "scalafix:Disable.scala.collection.mutable",
+    "scalafix:DisableSyntax.implicitConversion",
+    "scalafix:Disable.blocking.io"
+  )
+)
 object ModulesPlugin extends AutoPlugin {
 
   override def trigger = allRequirements
