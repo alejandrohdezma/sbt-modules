@@ -29,6 +29,21 @@ object ModulesPlugin extends AutoPlugin {
 
   object autoImport {
 
+    implicit class ProjectOpsWithProjectReferenceList(private val project: Project) extends AnyVal {
+
+      /** Adds classpath dependencies on internal or external projects. */
+      def dependsOn(deps: List[ProjectReference]): Project =
+        project.dependsOn(deps: _*)
+
+      /**
+       * Adds projects to be aggregated.  When a user requests a task to run on this project from the command line,
+       * the task will also be run in aggregated projects.
+       */
+      def aggregate(refs: List[ProjectReference]): Project =
+        project.aggregate(refs: _*)
+
+    }
+
     /** List of all modules created with [[module]] */
     val allModules: List[ProjectReference] =
       Option(file("./modules"))

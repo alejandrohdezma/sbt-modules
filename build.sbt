@@ -8,7 +8,7 @@ addCommandAlias("ci-publish", "github; ci-release")
 
 lazy val documentation = project
   .enablePlugins(MdocPlugin)
-  .dependsOn(allModules: _*)
+  .dependsOn(allModules)
   .settings(mdocOut := file("."))
 
 lazy val `sbt-modules` = module
