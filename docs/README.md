@@ -74,6 +74,8 @@ lazy val `my-library-core` = module
 lazy val `my-library-plugin` = module.dependsOn(`my-library-core`)
 ```
 
+> Important ‼️ The `allModules` variable is created by listing all the directories in the `modules` directory so ensure: (1) that all your modules have a corresponding directory inside `modules` and (2) that there are no directories inside `modules` that aren't a module.
+
 ### Auto-`skip in publish`
 
 Forget about setting `skip in publish := true` again. Adding this plugin to your build will disable publishing for all the projects in the build (including the auto-generated root plugin), except for those created with `module`.

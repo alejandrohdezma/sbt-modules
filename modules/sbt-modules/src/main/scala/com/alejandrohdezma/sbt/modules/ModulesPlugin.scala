@@ -16,7 +16,6 @@
 
 package com.alejandrohdezma.sbt.modules
 
-import scala.collection.mutable
 import scala.language.experimental.macros
 import scala.reflect.macros._
 
@@ -31,12 +30,18 @@ object ModulesPlugin extends AutoPlugin {
   object autoImport {
 
     /** List of all modules created with [[module]] */
-    val allModules: mutable.MutableList[Project] = mutable.MutableList[Project]()
+    val allModules: List[ProjectReference] =
+      Option(file("./modules"))
+        .filter(_.isDirectory())
+        .fold(List.empty[File])(_.listFiles.toList)
+        .filter(_.isDirectory())
+        .map(_.getName())
+        .map(LocalProject(_))
 
-    implicit def MutableListProject2ListClasspathDependency(
-        list: mutable.MutableList[Project]
+    implicit def ListProject2ListClasspathDependency(
+        list: List[ProjectReference]
     ): List[ClasspathDep[ProjectReference]] =
-      list.map(classpathDependency(_)).toList
+      list.map(classpathDependency(_))
 
     /**
      * Creates a new Project with `modules` as base directory.
@@ -64,12 +69,7 @@ object ModulesPlugin extends AutoPlugin {
       val name = c.Expr[String](Literal(Constant(enclosingValName)))
 
       reify {
-        val project = Project(name.splice, file("modules") / name.splice)
-          .settings(skip in publish := false)
-
-        ModulesPlugin.autoImport.allModules += project
-
-        project
+        Project(name.splice, file("modules") / name.splice).settings(skip in publish := false)
       }
     }
 
