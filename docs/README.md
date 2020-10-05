@@ -8,7 +8,7 @@
 lazy val docs = project
 -  .settings(skip in publish := true)
 -  .dependsOn(allProjects: _*)
-+  .dependsOn(allModules: _*)
++  .dependsOn(allModules)
   .in(file("docs"))
 
 + lazy val `my-library-core` = module
@@ -67,12 +67,14 @@ Would expect the following directory structure:
 `sbt-modules` creates a special variable called `allModules` that aggregates all the modules created with `module`, so you can pass it along as a dependency to other projects in your build, like:
 
 ```sbt
-lazy val documentation = project.dependsOn(allModules: _*)
+lazy val documentation = project.dependsOn(allModules)
 
 lazy val `my-library-core` = module
 
 lazy val `my-library-plugin` = module.dependsOn(`my-library-core`)
 ```
+
+> Important ‼️ The `allModules` variable is created by listing all the directories in the `modules` directory so ensure: (1) that all your modules have a corresponding directory inside `modules` and (2) that there are no directories inside `modules` that aren't a module.
 
 ### Auto-`skip in publish`
 
@@ -84,7 +86,7 @@ Example:
 
 ```sbt
 // Will not be published
-lazy val documentation = project.dependsOn(allmodules: _*)
+lazy val documentation = project.dependsOn(allmodules)
 
 // Will be published
 lazy val `my-library-plugin` = module.dependsOn(`my-library-core`)

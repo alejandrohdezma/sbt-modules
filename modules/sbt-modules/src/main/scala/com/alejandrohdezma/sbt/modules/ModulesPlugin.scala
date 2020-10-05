@@ -16,27 +16,53 @@
 
 package com.alejandrohdezma.sbt.modules
 
-import scala.collection.mutable
 import scala.language.experimental.macros
 import scala.reflect.macros._
 
 import sbt.Keys._
 import sbt._
 
-@SuppressWarnings(Array("scalafix:Disable.scala.collection.mutable", "scalafix:DisableSyntax.implicitConversion"))
+@SuppressWarnings(
+  Array(
+    "scalafix:Disable.scala.collection.mutable",
+    "scalafix:DisableSyntax.implicitConversion",
+    "scalafix:Disable.blocking.io"
+  )
+)
 object ModulesPlugin extends AutoPlugin {
 
   override def trigger = allRequirements
 
   object autoImport {
 
-    /** List of all modules created with [[module]] */
-    val allModules: mutable.MutableList[Project] = mutable.MutableList[Project]()
+    implicit class ProjectOpsWithProjectReferenceList(private val project: Project) extends AnyVal {
 
-    implicit def MutableListProject2ListClasspathDependency(
-        list: mutable.MutableList[Project]
+      /** Adds classpath dependencies on internal or external projects. */
+      def dependsOn(deps: List[ProjectReference]): Project =
+        project.dependsOn(deps: _*)
+
+      /**
+       * Adds projects to be aggregated.  When a user requests a task to run on this project from the command line,
+       * the task will also be run in aggregated projects.
+       */
+      def aggregate(refs: List[ProjectReference]): Project =
+        project.aggregate(refs: _*)
+
+    }
+
+    /** List of all modules created with [[module]] */
+    val allModules: List[ProjectReference] =
+      Option(file("./modules"))
+        .filter(_.isDirectory())
+        .fold(List.empty[File])(_.listFiles.toList)
+        .filter(_.isDirectory())
+        .map(_.getName())
+        .map(LocalProject(_))
+
+    implicit def ListProject2ListClasspathDependency(
+        list: List[ProjectReference]
     ): List[ClasspathDep[ProjectReference]] =
-      list.map(classpathDependency(_)).toList
+      list.map(classpathDependency(_))
 
     /**
      * Creates a new Project with `modules` as base directory.
@@ -64,12 +90,7 @@ object ModulesPlugin extends AutoPlugin {
       val name = c.Expr[String](Literal(Constant(enclosingValName)))
 
       reify {
-        val project = Project(name.splice, file("modules") / name.splice)
-          .settings(skip in publish := false)
-
-        ModulesPlugin.autoImport.allModules += project
-
-        project
+        Project(name.splice, file("modules") / name.splice).settings(skip in publish := false)
       }
     }
 
