@@ -9,5 +9,5 @@ TaskKey[Unit]("check", "Checks c depends on a & b using `allModules`") := {
     ClasspathDependency(LocalProject("b"), None)
   )
 
-  assert(c.dependencies == expected, s"Found: ${c.dependencies}\nExpected: $expected")
+  assert(c.dependencies.toSet == expected.toSet, s"Found: ${c.dependencies}\nExpected: $expected")
 }
