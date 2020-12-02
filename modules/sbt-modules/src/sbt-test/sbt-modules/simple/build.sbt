@@ -13,7 +13,7 @@ TaskKey[Unit]("checkRoot", "Checks root project aggregates modules") := {
   val aggregate = (LocalRootProject / thisProject).value.aggregate
   val base = (LocalRootProject / thisProject).value.base
 
-  val expected = List(ProjectRef(base, "b"), ProjectRef(base, "a"))
+  val expected = List(ProjectRef(base, "a"), ProjectRef(base, "b"))
 
   assert(aggregate == expected, s"Found: $aggregate}\nExpected: $expected")
 }
