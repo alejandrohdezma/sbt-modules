@@ -90,7 +90,7 @@ object ModulesPlugin extends AutoPlugin {
       val name = c.Expr[String](Literal(Constant(enclosingValName)))
 
       reify {
-        Project(name.splice, file("modules") / name.splice).settings(skip in publish := false)
+        Project(name.splice, file("modules") / name.splice).settings(publish / skip := false)
       }
     }
 
