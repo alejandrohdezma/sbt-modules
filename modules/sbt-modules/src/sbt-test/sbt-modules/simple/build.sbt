@@ -3,17 +3,16 @@ lazy val b = module
 
 TaskKey[Unit]("checkModules", "Checks all base directories are correct") := {
   assertFiles(a.base, file("modules") / "a")
-  assertFiles((baseDirectory in a).value, file("modules") / "a")
+  assertFiles((a / baseDirectory).value, file("modules") / "a")
 
   assertFiles(b.base, file("modules") / "b")
-  assertFiles((baseDirectory in b).value, file("modules") / "b")
+  assertFiles((b / baseDirectory).value, file("modules") / "b")
 }
 
 TaskKey[Unit]("checkRoot", "Checks root project aggregates modules") := {
-  val aggregate = (LocalRootProject / thisProject).value.aggregate
-  val base = (LocalRootProject / thisProject).value.base
+  val aggregate = (LocalRootProject / thisProject).value.aggregate.map(_.project)
 
-  val expected = List(ProjectRef(base, "a"), ProjectRef(base, "b"))
+  val expected = List("a", "b")
 
   assert(aggregate == expected, s"Found: $aggregate}\nExpected: $expected")
 }
