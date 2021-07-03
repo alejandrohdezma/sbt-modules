@@ -19,9 +19,7 @@ package com.alejandrohdezma.sbt.modules
 import scala.annotation.tailrec
 import scala.reflect.macros._
 
-/**
- * Copied as-is from [[https://git.io/JfXOx SBT]].
- */
+/** Copied as-is from [[https://git.io/JfXOx SBT]]. */
 @SuppressWarnings(Array("all"))
 private[modules] object KeyMacro {
 
