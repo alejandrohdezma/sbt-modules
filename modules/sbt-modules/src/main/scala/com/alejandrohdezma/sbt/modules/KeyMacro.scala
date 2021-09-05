@@ -49,4 +49,5 @@ private[modules] object KeyMacro {
       .context
       .enclosingContextChain
       .map(_.tree.asInstanceOf[c.Tree])
+
 }

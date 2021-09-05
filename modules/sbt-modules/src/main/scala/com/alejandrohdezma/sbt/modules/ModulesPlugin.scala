@@ -41,8 +41,8 @@ object ModulesPlugin extends AutoPlugin {
       def dependsOn(deps: List[ProjectReference]): Project =
         project.dependsOn(deps: _*)
 
-      /** Adds projects to be aggregated.  When a user requests a task to run on this project from the command line,
-        * the task will also be run in aggregated projects.
+      /** Adds projects to be aggregated. When a user requests a task to run on this project from the command line, the
+        * task will also be run in aggregated projects.
         */
       def aggregate(refs: List[ProjectReference]): Project =
         project.aggregate(refs: _*)
@@ -67,14 +67,14 @@ object ModulesPlugin extends AutoPlugin {
       *
       * This is a macro that expects to be assigned directly to a `val`.
       *
-      * The name of the val is used as the project ID and the name of its base
-      * directory inside `modules`.
+      * The name of the val is used as the project ID and the name of its base directory inside `modules`.
       */
     def module: Project = macro Macros.projectMacroImpl
 
   }
 
   private[modules] class Macros(val c: blackbox.Context) {
+
     import c.universe._
 
     def projectMacroImpl: c.Expr[Project] = {
