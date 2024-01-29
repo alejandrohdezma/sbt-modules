@@ -34,7 +34,7 @@ lazy val docs = project
 Add the following line to your `plugins.sbt` file:
 
 ```sbt
-addSbtPlugin("com.alejandrohdezma" % "sbt-modules" % "0.2.0")
+addSbtPlugin("com.alejandrohdezma" % "sbt-modules" % "0.3.0")
 ```
 
 ## Usage
