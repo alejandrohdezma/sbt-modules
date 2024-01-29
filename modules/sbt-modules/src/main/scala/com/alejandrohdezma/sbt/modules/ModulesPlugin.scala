@@ -22,18 +22,34 @@ import scala.reflect.macros._
 import sbt.Keys._
 import sbt._
 
-@SuppressWarnings(
-  Array(
-    "scalafix:Disable.scala.collection.mutable",
-    "scalafix:DisableSyntax.implicitConversion",
-    "scalafix:Disable.blocking.io"
-  )
-)
+@SuppressWarnings(Array("scalafix:DisableSyntax.implicitConversion"))
 object ModulesPlugin extends AutoPlugin {
 
   override def trigger = allRequirements
 
   object autoImport {
+
+    implicit class AnyOnOps(version: String) {
+
+      /** Transforms the given value into an `Option`.
+        *
+        * The result will be `None` if the version string doesn't match the provided major version.
+        */
+      def on[A](major: Int)(a: => A): Option[A] =
+        CrossVersion
+          .partialVersion(version)
+          .collect { case (`major`, _) => a }
+
+      /** Transforms the given value into an `Option`.
+        *
+        * The result will be `None` if the version string doesn't match the provided major/minor versions.
+        */
+      def on[A](major: Int, minor: Int)(a: => A): Option[A] =
+        CrossVersion
+          .partialVersion(version)
+          .collect { case (`major`, `minor`) => a }
+
+    }
 
     implicit class ProjectOpsWithProjectReferenceList(private val project: Project) extends AnyVal {
 
