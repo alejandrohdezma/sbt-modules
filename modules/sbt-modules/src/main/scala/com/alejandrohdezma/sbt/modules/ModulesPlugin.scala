@@ -89,6 +89,8 @@ object ModulesPlugin extends AutoPlugin {
 
   }
 
+  import autoImport._
+
   private[modules] class Macros(val c: blackbox.Context) {
 
     import c.universe._
@@ -111,5 +113,12 @@ object ModulesPlugin extends AutoPlugin {
   }
 
   override def buildSettings: Seq[Def.Setting[_]] = Seq(publish / skip := true)
+
+  override def projectSettings: Seq[Def.Setting[_]] = Seq(
+    Compile / unmanagedSourceDirectories ++=
+      scalaVersion.value.on(2, 13)(sourceDirectory.value / "main" / "scala-2.13+"),
+    Compile / unmanagedSourceDirectories ++=
+      scalaVersion.value.on(3)(sourceDirectory.value / "main" / "scala-2.13+")
+  )
 
 }
