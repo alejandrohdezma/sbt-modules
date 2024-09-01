@@ -1,7 +1,5 @@
 # SBT plugin that simplifies modules creation
 
-[![][github-action-badge]][github-action] [![][maven-badge]][maven] [![][steward-badge]][steward] 
-
 ```diff
 - skip in publish := true
 - 
