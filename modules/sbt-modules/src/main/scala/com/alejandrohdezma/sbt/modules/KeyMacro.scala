@@ -25,7 +25,7 @@ private[modules] object KeyMacro {
 
   def definingValName(c: blackbox.Context, invalidEnclosingTree: String => String): String = {
     import c.universe.{Apply => ApplyTree, _}
-    val methodName = c.macroApplication.symbol.name
+    val methodName                   = c.macroApplication.symbol.name
     def processName(n: Name): String =
       n.decodedName.toString.trim // trim is not strictly correct, but macros don't expose the API necessary
     @tailrec def enclosingVal(trees: List[c.Tree]): String = {
