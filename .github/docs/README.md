@@ -1,10 +1,10 @@
 # @DESCRIPTION@
 
 ```diff
-- skip in publish := true
+- publish / skip := true
 - 
 lazy val docs = project
--  .settings(skip in publish := true)
+-  .settings(publish / skip := true)
 -  .dependsOn(allProjects: _*)
 +  .dependsOn(allModules)
   .in(file("docs"))
@@ -74,17 +74,23 @@ lazy val `my-library-plugin` = module.dependsOn(`my-library-core`)
 
 > Important ‼️ The `allModules` variable is created by listing all the directories in the `modules` directory so ensure: (1) that all your modules have a corresponding directory inside `modules` and (2) that there are no directories inside `modules` that aren't a module.
 
-### Auto-`skip in publish`
+### `packageIsModule` setting
 
-Forget about setting `skip in publish := true` again. Adding this plugin to your build will disable publishing for all the projects in the build (including the auto-generated root plugin), except for those created with `module`.
+Every project created with `module` has an `packageIsModule` setting key automatically set to `true`. Regular projects and the root project have it set to `false`. This can be used by other plugins to detect which projects are modules.
 
-However, if you also want to exclude any of those created with `module` you can always add `.settings(skip in publish := true)`.
+### Auto-`publish / skip`
+
+Forget about setting `publish / skip := true` again. Adding this plugin to your build will disable publishing for all the projects in the build (including the auto-generated root plugin), except for those created with `module`.
+
+The behavior is driven by the `packageIsModule` setting: projects with `packageIsModule := true` will have `publish / skip := false` (i.e., they will be published), while all others will have `publish / skip := true`. Other plugins that depend on `ModulesPlugin` can override `publish / skip` based on `packageIsModule` to implement custom publishing logic.
+
+If you want to exclude any module from publishing you can always add `.settings(publish / skip := true)`.
 
 Example:
 
 ```sbt
 // Will not be published
-lazy val documentation = project.dependsOn(allmodules)
+lazy val documentation = project.dependsOn(allModules)
 
 // Will be published
 lazy val `my-library-plugin` = module.dependsOn(`my-library-core`)
@@ -93,8 +99,22 @@ lazy val `my-library-plugin` = module.dependsOn(`my-library-core`)
 lazy val `my-library-core` = module
 
 // Will not be published
-lazy val `my-library-util` = module.settings(skip in publish := true)
+lazy val `my-library-util` = module.settings(publish / skip := true)
 ```
+
+### `moduleMetadata` task key
+
+The `moduleMetadata` task key provides a `Map[String, ModuleMetadata]` containing metadata for all modules in the build. Each `ModuleMetadata` includes:
+
+- `version`: the module's version (from the SBT `version` setting)
+- `internalDeps`: names of modules this module directly depends on
+- `dependents`: names of modules that directly depend on this module
+- `transitiveDependencies`: names of all modules this module transitively depends on
+- `transitiveDependents`: names of all modules that transitively depend on this module
+
+This is useful for plugins that need to inspect the module dependency graph, for example to implement cascading version bumps or detect affected modules.
+
+You can also call `ModuleMetadata.from(state)` directly in SBT commands where `State` is available.
 
 [github-action]: https://github.com/alejandrohdezma/sbt-modules/actions
 [github-action-badge]: https://img.shields.io/endpoint.svg?url=https%3A%2F%2Factions-badge.atrox.dev%2Falejandrohdezma%2Fsbt-modules%2Fbadge%3Fref%3Dmaster&style=flat

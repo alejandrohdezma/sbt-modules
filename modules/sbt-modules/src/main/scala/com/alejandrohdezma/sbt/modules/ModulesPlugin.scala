@@ -79,6 +79,12 @@ object ModulesPlugin extends AutoPlugin {
     ): List[ClasspathDep[ProjectReference]] =
       list.map(classpathDependency(_))
 
+    /** Whether this project is a module (i.e. created via the [[module]] macro). */
+    val packageIsModule = settingKey[Boolean]("Whether the project is a module (created via the [[module]] macro)")
+
+    /** Map from module name to its [[ModuleMetadata]], including versions, dependencies, and transitive closures. */
+    val moduleMetadata = taskKey[Map[String, ModuleMetadata]]("Metadata for all modules in the build")
+
     /** Creates a new Project with `modules` as base directory.
       *
       * This is a macro that expects to be assigned directly to a `val`.
@@ -106,7 +112,7 @@ object ModulesPlugin extends AutoPlugin {
       val name = c.Expr[String](Literal(Constant(enclosingValName)))
 
       reify {
-        Project(name.splice, file("modules") / name.splice).settings(publish / skip := false)
+        Project(name.splice, file("modules") / name.splice).settings(packageIsModule := true)
       }
     }
 
@@ -114,7 +120,13 @@ object ModulesPlugin extends AutoPlugin {
 
   override def buildSettings: Seq[Def.Setting[_]] = Seq(publish / skip := true)
 
+  override def globalSettings: Seq[Def.Setting[_]] = Seq(
+    moduleMetadata := ModuleMetadata.from(state.value)
+  )
+
   override def projectSettings: Seq[Def.Setting[_]] = Seq(
+    packageIsModule                       := false,
+    publish / skip                        := !packageIsModule.value,
     Compile / unmanagedSourceDirectories ++=
       scalaVersion.value.on(2, 13)(sourceDirectory.value / "main" / "scala-2.13+"),
     Compile / unmanagedSourceDirectories ++=

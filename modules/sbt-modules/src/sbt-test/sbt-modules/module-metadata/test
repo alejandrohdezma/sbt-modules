@@ -1,0 +1,3 @@
+# this test ensures ModuleMetadata.from discovers modules, versions, and dependency graph
+> checkMetadata
+> checkMetadataKey
