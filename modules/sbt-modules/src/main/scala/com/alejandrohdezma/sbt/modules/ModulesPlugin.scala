@@ -72,6 +72,7 @@ object ModulesPlugin extends AutoPlugin {
         .fold(List.empty[File])(_.listFiles.toList)
         .filter(_.isDirectory())
         .map(_.getName())
+        .sorted
         .map(LocalProject(_))
 
     implicit def ListProject2ListClasspathDependency(
