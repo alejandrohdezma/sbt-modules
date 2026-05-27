@@ -1,10 +1,12 @@
-import com.alejandrohdezma.sbt.modules.ModuleMetadata
+import com.alejandrohdezma.sbt.modules.{ModuleDependency, ModuleMetadata}
 
 lazy val core = module
 
 lazy val api = module.dependsOn(core)
 
 lazy val server = module.dependsOn(api)
+
+lazy val consumer = module.dependsOn(core % Test)
 
 TaskKey[Unit]("checkMetadata", "Checks ModuleMetadata.from returns correct data") := {
   val metadata = ModuleMetadata.from(state.value)
@@ -14,20 +16,27 @@ TaskKey[Unit]("checkMetadata", "Checks ModuleMetadata.from returns correct data"
       version = version.value,
       dependencies = Set.empty,
       transitiveDependencies = Set.empty,
-      dependents = Set("api"),
-      transitiveDependents = Set("api", "server")
+      dependents = Set(ModuleDependency("api", "compile"), ModuleDependency("consumer", "test")),
+      transitiveDependents = Set("api", "server", "consumer")
     ),
     "api" -> ModuleMetadata(
       version = version.value,
-      dependencies = Set("core"),
+      dependencies = Set(ModuleDependency("core", "compile")),
       transitiveDependencies = Set("core"),
-      dependents = Set("server"),
+      dependents = Set(ModuleDependency("server", "compile")),
       transitiveDependents = Set("server")
     ),
     "server" -> ModuleMetadata(
       version = version.value,
-      dependencies = Set("api"),
+      dependencies = Set(ModuleDependency("api", "compile")),
       transitiveDependencies = Set("core", "api"),
+      dependents = Set.empty,
+      transitiveDependents = Set.empty
+    ),
+    "consumer" -> ModuleMetadata(
+      version = version.value,
+      dependencies = Set(ModuleDependency("core", "test")),
+      transitiveDependencies = Set("core"),
       dependents = Set.empty,
       transitiveDependents = Set.empty
     )

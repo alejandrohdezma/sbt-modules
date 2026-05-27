@@ -107,8 +107,8 @@ lazy val `my-library-util` = module.settings(publish / skip := true)
 The `moduleMetadata` task key provides a `Map[String, ModuleMetadata]` containing metadata for all modules in the build. Each `ModuleMetadata` includes:
 
 - `version`: the module's version (from the SBT `version` setting)
-- `internalDeps`: names of modules this module directly depends on
-- `dependents`: names of modules that directly depend on this module
+- `dependencies`: the modules this module directly depends on, each a `ModuleDependency` carrying the `dependsOn` edge's configuration (e.g. `"compile"`, `"test"`)
+- `dependents`: the modules that directly depend on this module, each a `ModuleDependency` with the incoming edge's configuration
 - `transitiveDependencies`: names of all modules this module transitively depends on
 - `transitiveDependents`: names of all modules that transitively depend on this module
 
