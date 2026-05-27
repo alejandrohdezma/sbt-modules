@@ -22,24 +22,35 @@ import sbt._
 
 import com.alejandrohdezma.sbt.modules.ModulesPlugin.autoImport.packageIsModule
 
+/** A direct dependency edge between two modules.
+  *
+  * @param name
+  *   the name of the module on the other end of the edge
+  * @param configuration
+  *   the Ivy configuration mapping of the `dependsOn` edge, as recorded by SBT and normalized so that a default
+  *   `dependsOn` (which SBT leaves unset) is reported as `"compile"`. Examples: `"compile"`, `"test"`, `"test->test"`,
+  *   `"compile->compile;test->test"`. Consumers decide what each scope means.
+  */
+final case class ModuleDependency(name: String, configuration: String)
+
 /** Represents an SBT module created with the [[ModulesPlugin.autoImport.module module]] macro.
   *
   * @param version
   *   the current version from the SBT `version` setting
   * @param dependencies
-  *   names of other modules this module depends on (via SBT `dependsOn`)
+  *   the modules this module directly depends on (via SBT `dependsOn`), each with the edge's configuration
   * @param transitiveDependencies
-  *   names of all modules this module transitively depends on
+  *   names of all modules this module transitively depends on (over all scopes)
   * @param dependents
-  *   names of modules that directly depend on this module (reverse of `internalDeps`)
+  *   the modules that directly depend on this module, each carrying the configuration of the incoming edge
   * @param transitiveDependents
-  *   names of all modules that transitively depend on this module
+  *   names of all modules that transitively depend on this module (over all scopes)
   */
 final case class ModuleMetadata(
     version: String,
-    dependencies: Set[String],
+    dependencies: Set[ModuleDependency],
     transitiveDependencies: Set[String],
-    dependents: Set[String],
+    dependents: Set[ModuleDependency],
     transitiveDependents: Set[String]
 )
 
@@ -69,17 +80,18 @@ object ModuleMetadata {
       val version      = extracted.get(ref / Keys.version)
       val dependencies = buildDeps.classpath.getOrElse(ref, Nil)
       val internal     = dependencies.collect {
-        case dep if namesByProject.contains(dep.project.project) => namesByProject(dep.project.project)
+        case dep if namesByProject.contains(dep.project.project) =>
+          ModuleDependency(namesByProject(dep.project.project), dep.configuration.getOrElse("compile"))
       }.toSet
 
       name -> ModuleMetadata(version = version, dependencies = internal, transitiveDependencies = Set.empty,
         dependents = Set.empty, transitiveDependents = Set.empty)
     }.toMap
 
-    // Second pass: populate direct dependents from the reverse of dependencies
-    val dependentsByModule = initial.foldLeft(Map.empty[String, Set[String]]) { case (acc, (name, info)) =>
+    // Second pass: populate direct dependents from the reverse of dependencies (carrying each edge's configuration)
+    val dependentsByModule = initial.foldLeft(Map.empty[String, Set[ModuleDependency]]) { case (acc, (name, info)) =>
       info.dependencies.foldLeft(acc) { (acc, dep) =>
-        acc.updated(dep, acc.getOrElse(dep, Set.empty) + name)
+        acc.updated(dep.name, acc.getOrElse(dep.name, Set.empty) + ModuleDependency(name, dep.configuration))
       }
     }
 
@@ -106,8 +118,8 @@ object ModuleMetadata {
 
     withDependents.map { case (name, info) =>
       name -> info.copy(
-        transitiveDependencies = closure(info.dependencies, _.dependencies),
-        transitiveDependents = closure(info.dependents, _.dependents)
+        transitiveDependencies = closure(info.dependencies.map(_.name), _.dependencies.map(_.name)),
+        transitiveDependents = closure(info.dependents.map(_.name), _.dependents.map(_.name))
       )
     }
   }
