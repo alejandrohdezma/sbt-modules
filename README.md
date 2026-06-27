@@ -32,7 +32,7 @@ lazy val docs = project
 Add the following line to your `plugins.sbt` file:
 
 ```sbt
-addSbtPlugin("com.alejandrohdezma" % "sbt-modules" % "0.5.0")
+addSbtPlugin("com.alejandrohdezma" % "sbt-modules" % "0.6.0")
 ```
 
 The same coordinate is published for both **sbt 1.x** (Scala 2.12) and **sbt 2.x** (Scala 3).
