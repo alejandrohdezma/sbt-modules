@@ -16,8 +16,7 @@
 
 package com.alejandrohdezma.sbt.modules
 
-import scala.language.experimental.macros
-import scala.reflect.macros._
+import scala.language.implicitConversions
 
 import sbt.Keys._
 import sbt._
@@ -27,7 +26,7 @@ object ModulesPlugin extends AutoPlugin {
 
   override def trigger = allRequirements
 
-  object autoImport {
+  object autoImport extends ModuleMacroCompat {
 
     implicit class AnyOnOps(version: String) {
 
@@ -55,13 +54,13 @@ object ModulesPlugin extends AutoPlugin {
 
       /** Adds classpath dependencies on internal or external projects. */
       def dependsOn(deps: List[ProjectReference]): Project =
-        project.dependsOn(deps: _*)
+        deps.foldLeft(project)(_.dependsOn(_))
 
       /** Adds projects to be aggregated. When a user requests a task to run on this project from the command line, the
         * task will also be run in aggregated projects.
         */
       def aggregate(refs: List[ProjectReference]): Project =
-        project.aggregate(refs: _*)
+        refs.foldLeft(project)(_.aggregate(_))
 
     }
 
@@ -84,48 +83,19 @@ object ModulesPlugin extends AutoPlugin {
     val packageIsModule = settingKey[Boolean]("Whether the project is a module (created via the [[module]] macro)")
 
     /** Map from module name to its [[ModuleMetadata]], including versions, dependencies, and transitive closures. */
-    val moduleMetadata = taskKey[Map[String, ModuleMetadata]]("Metadata for all modules in the build")
-
-    /** Creates a new Project with `modules` as base directory.
-      *
-      * This is a macro that expects to be assigned directly to a `val`.
-      *
-      * The name of the val is used as the project ID and the name of its base directory inside `modules`.
-      */
-    def module: Project = macro Macros.projectMacroImpl
+    @transient val moduleMetadata = taskKey[Map[String, ModuleMetadata]]("Metadata for all modules in the build")
 
   }
 
   import autoImport._
 
-  private[modules] class Macros(val c: blackbox.Context) {
+  override def buildSettings = Seq(publish / skip := true)
 
-    import c.universe._
-
-    def projectMacroImpl: c.Expr[Project] = {
-
-      val enclosingValName =
-        KeyMacro.definingValName(
-          c,
-          n => s"""$n must be directly assigned to a val, such as `val x = $n`."""
-        )
-
-      val name = c.Expr[String](Literal(Constant(enclosingValName)))
-
-      reify {
-        Project(name.splice, file("modules") / name.splice).settings(packageIsModule := true)
-      }
-    }
-
-  }
-
-  override def buildSettings: Seq[Def.Setting[_]] = Seq(publish / skip := true)
-
-  override def globalSettings: Seq[Def.Setting[_]] = Seq(
+  override def globalSettings = Seq(
     moduleMetadata := ModuleMetadata.from(state.value)
   )
 
-  override def projectSettings: Seq[Def.Setting[_]] = Seq(
+  override def projectSettings = Seq(
     packageIsModule                       := false,
     publish / skip                        := !packageIsModule.value,
     Compile / unmanagedSourceDirectories ++=

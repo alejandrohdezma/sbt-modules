@@ -1,7 +1,10 @@
+@transient val checkModules = taskKey[Unit]("Checks all base directories are correct")
+@transient val checkRoot    = taskKey[Unit]("Checks root project aggregates modules")
+
 lazy val a = module
 lazy val b = module
 
-TaskKey[Unit]("checkModules", "Checks all base directories are correct") := {
+checkModules := {
   assertFiles(a.base, file("modules") / "a")
   assertFiles((a / baseDirectory).value, file("modules") / "a")
 
@@ -9,7 +12,7 @@ TaskKey[Unit]("checkModules", "Checks all base directories are correct") := {
   assertFiles((b / baseDirectory).value, file("modules") / "b")
 }
 
-TaskKey[Unit]("checkRoot", "Checks root project aggregates modules") := {
+checkRoot := {
   val aggregate = (LocalRootProject / thisProject).value.aggregate.map(_.project)
 
   val expected = List("a", "b")
