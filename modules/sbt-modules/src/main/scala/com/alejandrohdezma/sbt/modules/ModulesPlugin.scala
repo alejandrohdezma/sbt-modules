@@ -17,6 +17,7 @@
 package com.alejandrohdezma.sbt.modules
 
 import scala.language.experimental.macros
+import scala.language.implicitConversions
 import scala.reflect.macros._
 
 import sbt.Keys._
@@ -55,13 +56,13 @@ object ModulesPlugin extends AutoPlugin {
 
       /** Adds classpath dependencies on internal or external projects. */
       def dependsOn(deps: List[ProjectReference]): Project =
-        project.dependsOn(deps: _*)
+        deps.foldLeft(project)(_.dependsOn(_))
 
       /** Adds projects to be aggregated. When a user requests a task to run on this project from the command line, the
         * task will also be run in aggregated projects.
         */
       def aggregate(refs: List[ProjectReference]): Project =
-        project.aggregate(refs: _*)
+        refs.foldLeft(project)(_.aggregate(_))
 
     }
 
@@ -119,13 +120,13 @@ object ModulesPlugin extends AutoPlugin {
 
   }
 
-  override def buildSettings: Seq[Def.Setting[_]] = Seq(publish / skip := true)
+  override def buildSettings = Seq(publish / skip := true)
 
-  override def globalSettings: Seq[Def.Setting[_]] = Seq(
+  override def globalSettings = Seq(
     moduleMetadata := ModuleMetadata.from(state.value)
   )
 
-  override def projectSettings: Seq[Def.Setting[_]] = Seq(
+  override def projectSettings = Seq(
     packageIsModule                       := false,
     publish / skip                        := !packageIsModule.value,
     Compile / unmanagedSourceDirectories ++=
