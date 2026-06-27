@@ -16,9 +16,7 @@
 
 package com.alejandrohdezma.sbt.modules
 
-import scala.language.experimental.macros
 import scala.language.implicitConversions
-import scala.reflect.macros._
 
 import sbt.Keys._
 import sbt._
@@ -28,7 +26,7 @@ object ModulesPlugin extends AutoPlugin {
 
   override def trigger = allRequirements
 
-  object autoImport {
+  object autoImport extends ModuleMacroCompat {
 
     implicit class AnyOnOps(version: String) {
 
@@ -85,40 +83,11 @@ object ModulesPlugin extends AutoPlugin {
     val packageIsModule = settingKey[Boolean]("Whether the project is a module (created via the [[module]] macro)")
 
     /** Map from module name to its [[ModuleMetadata]], including versions, dependencies, and transitive closures. */
-    val moduleMetadata = taskKey[Map[String, ModuleMetadata]]("Metadata for all modules in the build")
-
-    /** Creates a new Project with `modules` as base directory.
-      *
-      * This is a macro that expects to be assigned directly to a `val`.
-      *
-      * The name of the val is used as the project ID and the name of its base directory inside `modules`.
-      */
-    def module: Project = macro Macros.projectMacroImpl
+    @transient val moduleMetadata = taskKey[Map[String, ModuleMetadata]]("Metadata for all modules in the build")
 
   }
 
   import autoImport._
-
-  private[modules] class Macros(val c: blackbox.Context) {
-
-    import c.universe._
-
-    def projectMacroImpl: c.Expr[Project] = {
-
-      val enclosingValName =
-        KeyMacro.definingValName(
-          c,
-          n => s"""$n must be directly assigned to a val, such as `val x = $n`."""
-        )
-
-      val name = c.Expr[String](Literal(Constant(enclosingValName)))
-
-      reify {
-        Project(name.splice, file("modules") / name.splice).settings(packageIsModule := true)
-      }
-    }
-
-  }
 
   override def buildSettings = Seq(publish / skip := true)
 
