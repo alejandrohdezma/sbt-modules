@@ -35,6 +35,8 @@ Add the following line to your `plugins.sbt` file:
 addSbtPlugin("com.alejandrohdezma" % "sbt-modules" % "@VERSION@")
 ```
 
+The same coordinate is published for both **sbt 1.x** (Scala 2.12) and **sbt 2.x** (Scala 3).
+
 ## Usage
 
 Use `module` instead of `project` to create your SBT modules. Unlike `project`, `module` expects your modules to live in `modules` folder and uses the name of the variable for the project's ID and base folder (just like `project` does).
