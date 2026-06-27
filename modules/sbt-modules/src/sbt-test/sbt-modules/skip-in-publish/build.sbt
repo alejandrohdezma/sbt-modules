@@ -2,7 +2,7 @@ lazy val a = module
 lazy val b = module
 lazy val c = module.settings(publish / skip := true)
 
-lazy val d = project.dependsOn(allModules: _*)
+lazy val d = project.dependsOn(allModules)
 
 TaskKey[Unit]("check", "Checks packageIsModule and `publish / skip` for every module in build") := {
   // packageIsModule should be true for modules, false for regular projects/root
